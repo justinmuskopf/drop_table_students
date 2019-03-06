@@ -6,13 +6,8 @@
 
 class Location : public QPlace
 {
-    Q_OBJECT
 public:
-    explicit Location(QObject *parent = nullptr);
-
-signals:
-
-public slots:
+    explicit Location();
 };
 
 #endif // LOCATION_H

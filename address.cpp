@@ -1,6 +1,6 @@
 #include "address.h"
 
-Address::Address(QObject *parent) : QGeoAddress()
+Address::Address() : QGeoAddress()
 {
 
 }

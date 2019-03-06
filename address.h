@@ -6,13 +6,8 @@
 
 class Address : public QGeoAddress
 {
-    Q_OBJECT
 public:
-    explicit Address(QObject *parent = nullptr);
-
-signals:
-
-public slots:
+    explicit Address();
 };
 
 #endif // ADDRESS_H
