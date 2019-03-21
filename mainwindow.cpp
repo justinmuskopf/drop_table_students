@@ -12,3 +12,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::on_exit_Btn_clicked()
+{
+    MainWindow::close();
+}

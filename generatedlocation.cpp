@@ -4,3 +4,8 @@ GeneratedLocation::GeneratedLocation() : Location()
 {
 
 }
+
+QTime GeneratedLocation::getGenerationTime()
+{
+    return QTime::currentTime();
+}
