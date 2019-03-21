@@ -5,13 +5,13 @@ Location::Location() : QPlace()
 
 }
 
-int Location::newUser(std::string usr_name)
+int Location::newUser(QString usr_name)
 {
 
 }
 
 // returns the name of the location
-std::string Location::getName()
+QString Location::getName()
 {
     return name;
 }
@@ -35,7 +35,7 @@ const Address Location::getAddress()
 }
 
 // returns the type of business of the location
-std::string Location::getType()
+QString Location::getType()
 {
     return type;
 }

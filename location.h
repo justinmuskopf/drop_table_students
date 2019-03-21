@@ -4,23 +4,24 @@
 #include <QObject>
 #include <QPlace>
 #include <QTime>
+#include "address.h"
 
 class Location : public QPlace
 {
     private:
-        //Address address;  ??
-        std::string name;
+        Address address;
+        QString name;
         int hours[2];
-        std::string type;
+        QString type;
     public:
         explicit Location();
-        int newUser(std::string usr_name);
+        int newUser(QString usr_name);
         // list(habit) displayHabits(habits);
-        std::string getName();
+        QString getName();
         int openingHour();
         int closingHour();
         const Address getAddress();
-        std::string getType();
+        QString getType();
 };
 
 #endif // LOCATION_H

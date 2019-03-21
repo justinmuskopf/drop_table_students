@@ -5,13 +5,13 @@ Address::Address() : QGeoAddress()
 
 }
 
-Address::Address(std::string usr_street, unsigned int usr_num, unsigned int usr_zip, std::string usr_city, std::string usr_state) : QGeoAddress ()
+Address::Address(QString usr_street, unsigned int usr_num, unsigned int usr_zip, QString usr_city, QString usr_state) : QGeoAddress ()
 {
 
 }
 
 // set user street
-void Address::setStreet(std::string usr_street)
+void Address::setStreet(QString usr_street)
 {
     street = usr_street;
 }
@@ -29,13 +29,13 @@ void Address::setZipCode(unsigned int usr_zip)
 }
 
 // set user city
-void Address::setCity(std::string usr_city)
+void Address::setCity(QString usr_city)
 {
     city = usr_city;
 }
 
 // set user state
-void Address::setState(std::string usr_state)
+void Address::setState(QString usr_state)
 {
     state = usr_state;
 }
@@ -47,7 +47,7 @@ void Address::setCountry()
 }
 
 // get user address
-std::string Address::getAddress()
+QString Address::getAddress()
 {
-
+    return "";
 }
