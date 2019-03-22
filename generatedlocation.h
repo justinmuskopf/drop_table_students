@@ -5,8 +5,11 @@
 
 class GeneratedLocation : public Location
 {
-public:
-    explicit GeneratedLocation();
+    private:
+        QTime generationTime;
+    public:
+        explicit GeneratedLocation();
+        QTime getGenerationTime();
 };
 
 #endif // GENERATEDLOCATION_H

@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/">
+        <file>bin/libcrypto-1_1.dll</file>
+        <file>bin/libssl-1_1.dll</file>
+    </qresource>
+</RCC>
