@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QObject>
 
 namespace Ui {
 class MainWindow;
@@ -18,8 +19,11 @@ public:
 private slots:
     void on_exit_Btn_clicked();
 
+    void on_routeButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    QObject *map;
 };
 
 #endif // MAINWINDOW_H

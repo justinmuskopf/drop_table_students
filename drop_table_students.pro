@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui location network positioning
+QT       += core gui location network positioning qml quick
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,8 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     location.cpp \
     address.cpp \
     generatedlocation.cpp
@@ -44,3 +44,51 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    dll_includes.qrc
+
+
+TEMPLATE = app
+
+
+# Workaround for QTBUG-38735
+QT_FOR_CONFIG += location-private
+qtConfig(geoservices_mapboxgl): QT += sql opengl
+qtConfig(geoservices_osm): QT += concurrent
+
+RESOURCES += \
+    mapviewer.qrc
+
+OTHER_FILES +=mapviewer.qml \
+    helper.js \
+    map/MapComponent.qml \
+    map/MapSliders.qml \
+    map/Marker.qml \
+    map/CircleItem.qml \
+    map/RectangleItem.qml \
+    map/PolylineItem.qml \
+    map/PolygonItem.qml \
+    map/ImageItem.qml \
+    map/MiniMap.qml \
+    menus/ItemPopupMenu.qml \
+    menus/MainMenu.qml \
+    menus/MapPopupMenu.qml \
+    menus/MarkerPopupMenu \
+    forms/Geocode.qml \
+    forms/GeocodeForm.ui.qml\
+    forms/Message.qml \
+    forms/MessageForm.ui.qml \
+    forms/ReverseGeocode.qml \
+    forms/ReverseGeocodeForm.ui.qml \
+    forms/RouteCoordinate.qml \
+    forms/Locale.qml \
+    forms/LocaleForm.ui.qml \
+    forms/RouteAddress.qml \
+    forms/RouteAddressForm.ui.qml \
+    forms/RouteCoordinateForm.ui.qml \
+    forms/RouteList.qml \
+    forms/RouteListDelegate.qml \
+    forms/RouteListHeader.qml \
+    libcrypto-1_1.dll
+
