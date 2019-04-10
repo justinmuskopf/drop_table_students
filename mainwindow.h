@@ -14,11 +14,11 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    void parseAddressOne(QString user_input1);
+    void parseAddressTwo(QString user_input2);
     ~MainWindow();
 
 private slots:
-    void on_exit_Btn_clicked();
-
     void on_routeButton_clicked();
 
 private:
