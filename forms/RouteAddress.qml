@@ -56,9 +56,11 @@ RouteAddressForm {
     property alias plugin : tempGeocodeModel.plugin;
     property variant fromAddress;
     property variant toAddress;
+
     signal showMessage(string topic, string message)
     signal showRoute(variant startCoordinate,variant endCoordinate)
     signal closeForm()
+    signal addressesChanged(var _fromAddress, var _toAddress)
 
     goButton.onClicked: {
         tempGeocodeModel.reset()
@@ -103,6 +105,8 @@ RouteAddressForm {
         property int success: 0
         property variant startCoordinate
         property variant endCoordinate
+        property Location startLocation
+        property Location endLocation
 
         onCountChanged: {
             if (success == 1 && count == 1) {
@@ -115,15 +119,20 @@ RouteAddressForm {
             if ((status == GeocodeModel.Ready) && (count == 1)) {
                 success++
                 if (success == 1) {
-                    startCoordinate.latitude = get(0).coordinate.latitude
-                    startCoordinate.longitude = get(0).coordinate.longitude
+                    startLocation = get(0)
+                    startCoordinate.latitude = startLocation.coordinate.latitude
+                    startCoordinate.longitude = startLocation.coordinate.longitude
                 }
                 if (success == 2) {
                     endCoordinate.latitude = get(0).coordinate.latitude
                     endCoordinate.longitude = get(0).coordinate.longitude
+                    endLocation = get(0);
+
                     success = 0
-                    if (startCoordinate.isValid && endCoordinate.isValid)
+                    if (startCoordinate.isValid && endCoordinate.isValid) {
+                        addressesChanged(fromAddress, startLocation, toAddress, endLocation)
                         showRoute(startCoordinate,endCoordinate)
+                    }
                     else
                         goButton.enabled = true
                 }

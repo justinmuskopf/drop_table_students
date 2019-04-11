@@ -52,6 +52,7 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtLocation 5.6
 import QtPositioning 5.5
+import QtQuick.Window 2.12
 import "map"
 import "menus"
 import "helper.js" as Helper
@@ -121,10 +122,11 @@ ApplicationWindow {
     function providerSelect(provider)
     {
         createMap(provider)
-        if (map.error === Map.NoError) {
-            selectMapType(map.activeMapType)
-            toolsMenu.createMenu(map);
-        }
+        //if (map.error === Map.NoError) {
+            //selectMapType(map.activeMapType)
+            //mainMenu.toolsMenu.createMenu(map);
+
+        //}
     }
 
     function getPlugins()
@@ -156,29 +158,57 @@ ApplicationWindow {
         }
     }
 
+    function setAddresses() {
+        stackView.pop({item:page, immediate: true})
+        stackView.push({ item: Qt.resolvedUrl("forms/RouteAddress.qml") ,
+                           properties: { "plugin": map.plugin,
+                               "toAddress": toAddress,
+                               "fromAddress": fromAddress}})
+        stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
+        stackView.currentItem.showMessage.connect(stackView.showMessage)
+        stackView.currentItem.closeForm.connect(stackView.closeForm)
+        stackView.currentItem.addressesChanged.connect(signaller.setAddresses)
+    }
+
     title: qsTr("Mapviewer")
-    height: 640
-    width: 360
+    height: 800
+    width: 1000
     visible: true
     //menuBar: mainMenu
 
+    Item {
+        objectName: "signaller"
+        id: signaller
+        signal addressesChanged(var _fromAddress, var _fromCoordinate, var _toAddress, var _toCoordinate)
+
+        //property Location fromLocation
+       // property Location toLocation
+
+        function setAddresses(_fromAddress, _fromCoordinate, _toAddress, _toCoordinate) {
+            //fromLocation = _fromCoordinate
+            //toLocation = _toCoordinate
+            addressesChanged(_fromAddress, _fromCoordinate, _toAddress, _toCoordinate)
+        }
+    }
+
     //! [geocode0]
     Address {
-        id :fromAddress
-        street: "Sandakerveien 116"
-        city: "Oslo"
-        country: "Norway"
-        state : ""
-        postalCode: "0484"
+        objectName: "fromAddress"
+        id : fromAddress
+        street: "13116 Overlook Point Dr"
+        city: "Fort Worth"
+        country: "United States"
+        state : "Texas"
+        postalCode: "76177"
     }
     //! [geocode0]
 
     Address {
         id: toAddress
-        street: "Holmenkollveien 140"
-        city: "Oslo"
-        country: "Norway"
-        postalCode: "0791"
+        street: "3940 N Elm St"
+        city: "Denton"
+        country: "United States"
+        state: "Texas"
     }
 /*
     MainMenu {
@@ -224,6 +254,7 @@ ApplicationWindow {
             map.activeMapType = mapType
         }
 
+        signal addressesChanged(var from, var to)
 
         onSelectTool: {
             switch (tool) {
@@ -236,6 +267,7 @@ ApplicationWindow {
                 stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
                 stackView.currentItem.showMessage.connect(stackView.showMessage)
                 stackView.currentItem.closeForm.connect(stackView.closeForm)
+                stackView.currentItem.addressesChanged.connect(signaller.setAddresses)
                 break
             case "CoordinateRoute":
                 stackView.pop({item:page, immediate: true})
@@ -292,7 +324,7 @@ ApplicationWindow {
             }
         }
     }
-
+*/
     MapPopupMenu {
         id: mapPopupMenu
 
@@ -329,7 +361,7 @@ ApplicationWindow {
             }
         }
     }
-*/
+
     MarkerPopupMenu {
         id: markerPopupMenu
 
@@ -478,7 +510,7 @@ ApplicationWindow {
             width: page.width
             height: page.height
             onFollowmeChanged: mainMenu.isFollowMe = map.followme
-            onSupportedMapTypesChanged: mainMenu.mapTypeMenu.createMenu(map)
+            //onSupportedMapTypesChanged: mainMenu.mapTypeMenu.createMenu(map)
             onCoordinatesCaptured: {
                 var text = "<b>" + qsTr("Latitude:") + "</b> " + Helper.roundNumber(latitude,4) + "<br/><b>" + qsTr("Longitude:") + "</b> " + Helper.roundNumber(longitude,4)
                 stackView.showMessage(qsTr("Coordinates"),text);

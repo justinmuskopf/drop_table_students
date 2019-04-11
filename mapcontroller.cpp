@@ -1,54 +1,46 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "mapcontroller.h"
 #include <QQmlApplicationEngine>
 #include <QWindow>
 #include <QApplication>
 #include <QtQuick/QQuickItem>
 #include <QDebug>
+#include <QSslSocket>
+#include <QQuickView>
+#include <QQuickWidget>
+#include <QGeoAddress>
+#include <QGeoLocation>
+#include <QGeoCoordinate>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MapController::MapController() : QObject()
 {
-    ui->setupUi(this);
-
-    QQmlApplicationEngine *engine = new QQmlApplicationEngine();
+    engine = new QQmlApplicationEngine("qrc:/mapviewer.qml");
     engine->addImportPath(QStringLiteral(":/imports"));
-    engine->load(QUrl(QStringLiteral("qrc:/mapviewer.qml")));
-
-    QWindow *window = qobject_cast<QWindow *>(engine->rootObjects().first());
-
-    QWidget *container = QWidget::createWindowContainer(window, this);
-    container->setMinimumSize(window->size());
 
     map = engine->rootObjects().first();
+
+    signaller = map->findChild<QObject *>("signaller");
+
+    connect(signaller, SIGNAL(addressesChanged(QVariant, QVariant, QVariant, QVariant)), this,
+                       SLOT(on_addresses_changed(QVariant, QVariant, QVariant, QVariant)));
+
     Q_ASSERT(map);
 
-    QMetaObject::invokeMethod(map, "providerSelect", Q_ARG(QVariant, "esri"));
+    QMetaObject::invokeMethod(map, "providerSelect", Q_ARG(QVariant, "osm"));
 
-    ui->mapLayout->addWidget(container);
+
+    /*QMetaObject::invokeMethod(map, "initializeProviders",
+                              Q_ARG(QVariant, QVariant::fromValue(parameters)));
+    */
+
+    QMetaObject::invokeMethod(map, "setAddresses");
 }
 
-MainWindow::~MainWindow()
+MapController::~MapController()
 {
-    delete ui;
+
 }
 
-void MainWindow::on_routeButton_clicked()
-{
-    QString address1 = ui->address1_input->toPlainText();
-    QString address2 = ui->address2_input->toPlainText();
-
-    qDebug() << "address 1" << address1;
-
-    parseAddressOne(address1);
-    parseAddressTwo(address2);
-
-    ui->address1_input->clear();
-    ui->address2_input->clear();
-}
-
-void MainWindow::parseAddressOne(QString user_input1)
+void MapController::parseAddressOne(QString user_input1)
 {
     int street_num = 0;
     int zip = 0;
@@ -135,7 +127,32 @@ void MainWindow::parseAddressOne(QString user_input1)
     idx = 0;
 }
 
-void MainWindow::parseAddressTwo(QString user_input2)
+void MapController::parseAddressTwo(QString user_input2)
 {
 
 }
+
+
+void MapController::on_addresses_changed(const QVariant &from_address,
+                                      const QVariant &from_coordinate,
+                                      const QVariant &to_address,
+                                      const QVariant &to_coordinate)
+{
+    QObject *fromAddress = from_address.value<QObject *>();
+
+    QGeoLocation fromCoordinate = from_coordinate.value<QGeoLocation>();
+    qDebug() << fromCoordinate.address().street();
+
+    QObject *toAddress = to_address.value<QObject *>();
+    QObject *toCoordinate = to_coordinate.value<QObject *>();
+
+    QObject *obj = signaller->findChild<QObject *>("fromLocation");
+    QGeoLocation loc = obj->property("location").value<QGeoLocation>();
+    qDebug() << loc.address().street();
+
+   // QGeoLocation location = fromCoordinate->property("location").value<QGeoLocation>();
+
+    qDebug() << fromAddress->property("street").toString();
+
+}
+
