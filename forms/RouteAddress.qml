@@ -60,14 +60,22 @@ RouteAddressForm {
     signal showMessage(string topic, string message)
     signal showRoute(variant startCoordinate,variant endCoordinate)
     signal closeForm()
-    signal addressesChanged(var _fromAddress, var _toAddress)
+    //signal addressesChanged(var _fromAddress, var _fromCoordinate, var _toAddress, var _toCoordinate)
+    signal addressesChanged(var _fromLocation, var _toLocation)
+    Location {
+        id: startLocation
+    }
+
+    Location {
+        id: endLocation
+    }
 
     goButton.onClicked: {
         tempGeocodeModel.reset()
-        fromAddress.country =  fromCountry.text
+        fromAddress.state =  fromState.text
         fromAddress.street = fromStreet.text
         fromAddress.city =  fromCity.text
-        toAddress.country = toCountry.text
+        toAddress.state = toState.text
         toAddress.street = toStreet.text
         toAddress.city = toCity.text
         tempGeocodeModel.startCoordinate = QtPositioning.coordinate()
@@ -93,10 +101,10 @@ RouteAddressForm {
     Component.onCompleted: {
         fromStreet.text  = fromAddress.street
         fromCity.text =  fromAddress.city
-        fromCountry.text = fromAddress.country
+        fromState.text = fromAddress.state
         toStreet.text = toAddress.street
         toCity.text = toAddress.city
-        toCountry.text = toAddress.country
+        toState.text = toAddress.state
     }
 
     GeocodeModel {
@@ -105,8 +113,6 @@ RouteAddressForm {
         property int success: 0
         property variant startCoordinate
         property variant endCoordinate
-        property Location startLocation
-        property Location endLocation
 
         onCountChanged: {
             if (success == 1 && count == 1) {
@@ -119,18 +125,24 @@ RouteAddressForm {
             if ((status == GeocodeModel.Ready) && (count == 1)) {
                 success++
                 if (success == 1) {
-                    startLocation = get(0)
-                    startCoordinate.latitude = startLocation.coordinate.latitude
-                    startCoordinate.longitude = startLocation.coordinate.longitude
+                    startCoordinate.latitude = get(0).coordinate.latitude
+                    startCoordinate.longitude = get(0).coordinate.longitude
                 }
                 if (success == 2) {
                     endCoordinate.latitude = get(0).coordinate.latitude
                     endCoordinate.longitude = get(0).coordinate.longitude
-                    endLocation = get(0);
 
                     success = 0
                     if (startCoordinate.isValid && endCoordinate.isValid) {
-                        addressesChanged(fromAddress, startLocation, toAddress, endLocation)
+
+                        startLocation.coordinate = startCoordinate
+                        startLocation.address = fromAddress
+
+                        endLocation.coordinate = endCoordinate
+                        endLocation.address = toAddress
+
+                        addressesChanged(startLocation, endLocation)
+                        //addressesChanged(fromAddress, startCoordinate, toAddress, endCoordinate)
                         showRoute(startCoordinate,endCoordinate)
                     }
                     else

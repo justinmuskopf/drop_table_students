@@ -139,6 +139,21 @@ Map {
         scaleText.text = text
     }
 
+    MapItemView {
+        id: mapView
+        delegate: MapQuickItem {
+            coordinate: place.location.coordinate
+
+            anchorPoint.x: image.width * 0.5
+            anchorPoint.y: image.height
+
+            sourceItem: Column {
+                Image { id: image; source: "../resources/marker.png" }
+                Text { text: title; font.bold: true }
+            }
+        }
+    }
+
     function deleteMarkers()
     {
         var count = map.markers.length
@@ -158,6 +173,60 @@ Map {
             map.mapItems[i].destroy()
         }
         map.mapItems = []
+    }
+
+    function addMarkerCoordinate(coordinate)
+    {
+        var count = map.markers.length
+        markerCounter++
+        var marker = Qt.createQmlObject ('Marker {}', map)
+        map.addMapItem(marker)
+        marker.z = map.z+1
+        marker.coordinate = coordinate
+
+        //update list of markers
+        var myArray = new Array()
+        for (var i = 0; i < count; i++){
+            myArray.push(markers[i])
+        }
+        myArray.push(marker)
+        markers = myArray
+    }
+
+    function setFromCoordinate(coordinate)
+    {
+        var count = map.markers.length
+        markerCounter++
+        var marker = Qt.createQmlObject ('FromMarker {}', map)
+        map.addMapItem(marker)
+        marker.z = map.z+1
+        marker.coordinate = coordinate
+
+        //update list of markers
+        var myArray = new Array()
+        for (var i = 0; i < count; i++){
+            myArray.push(markers[i])
+        }
+        myArray.push(marker)
+        markers = myArray
+    }
+
+    function setToCoordinate(coordinate)
+    {
+        var count = map.markers.length
+        markerCounter++
+        var marker = Qt.createQmlObject ('ToMarker {}', map)
+        map.addMapItem(marker)
+        marker.z = map.z+1
+        marker.coordinate = coordinate
+
+        //update list of markers
+        var myArray = new Array()
+        for (var i = 0; i < count; i++){
+            myArray.push(markers[i])
+        }
+        myArray.push(marker)
+        markers = myArray
     }
 
     function addMarker()
@@ -352,28 +421,6 @@ Map {
         }
     }
 
-    MapQuickItem {
-        id: poiTheQtComapny
-        sourceItem: Rectangle { width: 14; height: 14; color: "#e41e25"; border.width: 2; border.color: "white"; smooth: true; radius: 7 }
-        coordinate {
-            latitude: 59.9485
-            longitude: 10.7686
-        }
-        opacity: 1.0
-        anchorPoint: Qt.point(sourceItem.width/2, sourceItem.height/2)
-    }
-
-    MapQuickItem {
-        sourceItem: Text{
-            text: "The Qt Company"
-            color:"#242424"
-            font.bold: true
-            styleColor: "#ECECEC"
-            style: Text.Outline
-        }
-        coordinate: poiTheQtComapny.coordinate
-        anchorPoint: Qt.point(-poiTheQtComapny.sourceItem.width * 0.5,poiTheQtComapny.sourceItem.height * 1.5)
-    }
 
     MapSliders {
         id: sliders

@@ -63,12 +63,6 @@ ApplicationWindow {
     property variant minimap
     property variant parameters
 
-    //defaults
-    //! [routecoordinate]
-    property variant fromCoordinate: QtPositioning.coordinate(59.9483, 10.7695)
-    property variant toCoordinate: QtPositioning.coordinate(59.9645, 10.671)
-    //! [routecoordinate]
-
     function createMap(provider)
     {
         var plugin
@@ -84,16 +78,10 @@ ApplicationWindow {
         }
 
         var zoomLevel = null
-        //var tilt = null
-        //var bearing = null
-        //var fov = null
         var center = null
         var panelExpanded = null
         if (map) {
             zoomLevel = map.zoomLevel
-            //tilt = map.tilt
-            //bearing = map.bearing
-            //fov = map.fieldOfView
             center = map.center
             panelExpanded = map.slidersExpanded
             map.destroy()
@@ -103,9 +91,6 @@ ApplicationWindow {
         map.plugin = plugin;
 
         if (zoomLevel != null) {
-            //map.tilt = tilt
-            //map.bearing = bearing
-            //map.fieldOfView = fov
             map.zoomLevel = zoomLevel
             map.center = center
             map.slidersExpanded = panelExpanded
@@ -119,14 +104,51 @@ ApplicationWindow {
         map.forceActiveFocus()
     }
 
+    PlaceSearchModel {
+        id: searchModel
+        searchArea: ""
+        searchTerm: "pizza"
+        Component.onCompleted: update()
+    }
+
+
+    ListView {
+        anchors.fill: parent
+        model: searchModel
+        delegate: Component {
+            Row {
+                spacing: 5
+                Marker { height: parent.height }
+                Column {
+                    Text { text: title; font.bold: true }
+                    Text { text: place.location.address.text }
+                }
+            }
+        }
+    }
+
+
+    function setMapCenter(latitude, longitude)
+    {
+        var centerCoordinate = QtPositioning.coordinate(latitude, longitude)
+
+        map.zoomLevel = 10
+        map.center = centerCoordinate
+
+        console.log("Map zoom level: ", map.zoomLevel)
+        console.log("Map Center: ", map.center.latitude, map.center.longitude)
+
+        map.mapView.model = searchModel
+        searchModel.searchArea = QtPositioning.circle(centerCoordinate, 100000)
+        searchModel.plugin = map.plugin
+
+
+        map.update()
+    }
+
     function providerSelect(provider)
     {
         createMap(provider)
-        //if (map.error === Map.NoError) {
-            //selectMapType(map.activeMapType)
-            //mainMenu.toolsMenu.createMenu(map);
-
-        //}
     }
 
     function getPlugins()
@@ -174,20 +196,17 @@ ApplicationWindow {
     height: 800
     width: 1000
     visible: true
-    //menuBar: mainMenu
 
     Item {
         objectName: "signaller"
         id: signaller
-        signal addressesChanged(var _fromAddress, var _fromCoordinate, var _toAddress, var _toCoordinate)
+        signal addressesChanged(var _fromLocation, var _toLocation)
 
-        //property Location fromLocation
-       // property Location toLocation
+        function setAddresses(_fromLocation, _toLocation) {
+            map.setFromCoordinate(_fromLocation.coordinate)
+            map.setToCoordinate(_toLocation.coordinate)
 
-        function setAddresses(_fromAddress, _fromCoordinate, _toAddress, _toCoordinate) {
-            //fromLocation = _fromCoordinate
-            //toLocation = _toCoordinate
-            addressesChanged(_fromAddress, _fromCoordinate, _toAddress, _toCoordinate)
+            addressesChanged(_fromLocation, _toLocation)
         }
     }
 
@@ -210,121 +229,7 @@ ApplicationWindow {
         country: "United States"
         state: "Texas"
     }
-/*
-    MainMenu {
-        id: mainMenu
 
-        function toggleMiniMapState()
-        {
-            if (minimap) {
-                minimap.destroy()
-                minimap = null
-            } else {
-                minimap = Qt.createQmlObject ('import "map"; MiniMap{ z: map.z + 2 }', map)
-            }
-        }
-
-        function setLanguage(lang)
-        {
-            map.plugin.locales = lang;
-            stackView.pop(page)
-        }
-
-        onSelectProvider: {
-            stackView.pop()
-            for (var i = 0; i < providerMenu.items.length; i++) {
-                providerMenu.items[i].checked = providerMenu.items[i].text === providerName
-            }
-
-            createMap(providerName)
-            if (map.error === Map.NoError) {
-                selectMapType(map.activeMapType)
-                toolsMenu.createMenu(map);
-            } else {
-                mapTypeMenu.clear();
-                toolsMenu.clear();
-            }
-        }
-
-        onSelectMapType: {
-            stackView.pop(page)
-            for (var i = 0; i < mapTypeMenu.items.length; i++) {
-                mapTypeMenu.items[i].checked = mapTypeMenu.items[i].text === mapType.name
-            }
-            map.activeMapType = mapType
-        }
-
-        signal addressesChanged(var from, var to)
-
-        onSelectTool: {
-            switch (tool) {
-            case "AddressRoute":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/RouteAddress.qml") ,
-                                   properties: { "plugin": map.plugin,
-                                       "toAddress": toAddress,
-                                       "fromAddress": fromAddress}})
-                stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
-                stackView.currentItem.showMessage.connect(stackView.showMessage)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                stackView.currentItem.addressesChanged.connect(signaller.setAddresses)
-                break
-            case "CoordinateRoute":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/RouteCoordinate.qml") ,
-                                   properties: { "toCoordinate": toCoordinate,
-                                       "fromCoordinate": fromCoordinate}})
-                stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "Geocode":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/Geocode.qml") ,
-                                   properties: { "address": fromAddress}})
-                stackView.currentItem.showPlace.connect(map.geocode)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "RevGeocode":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/ReverseGeocode.qml") ,
-                                   properties: { "coordinate": fromCoordinate}})
-                stackView.currentItem.showPlace.connect(map.geocode)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "Language":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/Locale.qml") ,
-                                   properties: { "locale":  map.plugin.locales[0]}})
-                stackView.currentItem.selectLanguage.connect(setLanguage)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "Clear":
-                map.clearData()
-                break
-            case "Prefetch":
-                map.prefetchData()
-                break
-            default:
-                console.log("Unsupported operation")
-            }
-        }
-
-        onToggleMapState: {
-            stackView.pop(page)
-            switch (state) {
-            case "FollowMe":
-                map.followme = !map.followme
-                break
-            case "MiniMap":
-                toggleMiniMapState()
-                isMiniMap = minimap
-                break
-            default:
-                console.log("Unsupported operation")
-            }
-        }
-    }
-*/
     MapPopupMenu {
         id: mapPopupMenu
 
@@ -495,11 +400,12 @@ ApplicationWindow {
 
         function showRouteListPage()
         {
-            push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
+            /*push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
                                properties: {
                                    "routeModel" : map.routeModel
                                }})
-            currentItem.closeForm.connect(closeForm)
+            currentItem.closeForm.connect(closeForm)*/
+            closeForm()
         }
     }
 

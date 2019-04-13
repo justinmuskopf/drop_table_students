@@ -53,8 +53,7 @@ QT_FOR_CONFIG += location-private
 qtConfig(geoservices_mapboxgl): QT += sql opengl
 qtConfig(geoservices_osm): QT += concurrent
 
-RESOURCES += \
-    mapviewer.qrc
+RESOURCES += mapviewer.qrc
 
 
 OTHER_FILES +=mapviewer.qml \
@@ -86,5 +85,7 @@ OTHER_FILES +=mapviewer.qml \
     forms/RouteCoordinateForm.ui.qml \
     forms/RouteList.qml \
     forms/RouteListDelegate.qml \
-    forms/RouteListHeader.qml
+    forms/RouteListHeader.qml \
+    map/ToMarker.qml \
+    map/FromMarker.qml
 

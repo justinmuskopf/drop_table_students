@@ -173,45 +173,7 @@ Row {
                         anchors.centerIn: parent
                     }
                 }
-                Rectangle{
-                    color: labelBackground
-                    height: parent.height
-                    width: parent.entryWidth
-                    border.color: sliderContainer.labelBorderColor
-                    Label {
-                        id: labelBearingValue
-                        text: bearingSlider.value.toFixed(2)
-                        font.pixelSize: fontSize
-                        rotation: -90
-                        anchors.centerIn: parent
-                    }
-                }
-                Rectangle{
-                    color: labelBackground
-                    height: parent.height
-                    width: parent.entryWidth
-                    border.color: sliderContainer.labelBorderColor
-                    Label {
-                        id: labelTiltValue
-                        text: tiltSlider.value.toFixed(2)
-                        font.pixelSize: fontSize
-                        rotation: -90
-                        anchors.centerIn: parent
-                    }
-                }
-                Rectangle{
-                    color: labelBackground
-                    height: parent.height
-                    width: parent.entryWidth
-                    border.color: sliderContainer.labelBorderColor
-                    Label {
-                        id: labelFovValue
-                        text: fovSlider.value.toFixed(2)
-                        font.pixelSize: fontSize
-                        rotation: -90
-                        anchors.centerIn: parent
-                    }
-                }
+
             } // rowSliderValues
 
             // The sliders row
@@ -230,40 +192,7 @@ Row {
                     onValueChanged: {
                             containerRow.mapSource.zoomLevel = value
                     }
-                }/*
-                C2.Slider {
-                    id: bearingSlider
-                    height: parent.height
-                    from: 0
-                    to: 360
-                    orientation : Qt.Vertical
-                    value: containerRow.mapSource.bearing
-                    onValueChanged: {
-                        containerRow.mapSource.bearing = value;
-                    }
                 }
-                C2.Slider {
-                    id: tiltSlider
-                    height: parent.height
-                    orientation : Qt.Vertical
-                    from: containerRow.mapSource.minimumTilt;
-                    to: containerRow.mapSource.maximumTilt
-                    value: containerRow.mapSource.tilt
-                    onValueChanged: {
-                        containerRow.mapSource.tilt = value;
-                    }
-                }
-                C2.Slider {
-                    id: fovSlider
-                    height: parent.height
-                    orientation : Qt.Vertical
-                    from: containerRow.mapSource.minimumFieldOfView
-                    to: containerRow.mapSource.maximumFieldOfView
-                    value: containerRow.mapSource.fieldOfView
-                    onValueChanged: {
-                        containerRow.mapSource.fieldOfView = value;
-                    }
-                }*/
             } // Row sliders
 
             // The labels row
@@ -287,47 +216,6 @@ Row {
                         anchors.centerIn: parent
                     }
                 }
-                /*
-                Rectangle{
-                    color: labelBackground
-                    height: parent.entryHeight
-                    width: parent.entryWidth
-                    border.color: sliderContainer.labelBorderColor
-                    Label {
-                        id: labelBearing
-                        text: "Bearing"
-                        font.pixelSize: fontSize
-                        rotation: -90
-                        anchors.centerIn: parent
-                    }
-                }
-                Rectangle{
-                    color: labelBackground
-                    height: parent.entryHeight
-                    width: parent.entryWidth
-                    border.color: sliderContainer.labelBorderColor
-                    Label {
-                        id: labelTilt
-                        text: "Tilt"
-                        font.pixelSize: fontSize
-                        rotation: -90
-                        anchors.centerIn: parent
-                    }
-                }
-                Rectangle{
-                    color: labelBackground
-                    height: parent.entryHeight
-                    width: parent.entryWidth
-                    border.color: sliderContainer.labelBorderColor
-                    Label {
-                        id: labelFov
-                        text: "FoV"
-                        font.pixelSize: fontSize
-                        rotation: -90
-                        anchors.centerIn: parent
-                    }
-
-                }*/
             } // rowSliderLabels
         } // Column
     } // sliderContainer

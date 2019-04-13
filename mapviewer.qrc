@@ -34,5 +34,9 @@
         <file>resources/scale.png</file>
         <file>resources/marker.png</file>
         <file>resources/icon.png</file>
+        <file>map/FromMarker.qml</file>
+        <file>map/ToMarker.qml</file>
+        <file>resources/from_marker.png</file>
+        <file>resources/to_marker.png</file>
     </qresource>
 </RCC>

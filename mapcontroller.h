@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QQmlApplicationEngine>
+#include <QGeoLocation>
+#include <QVariant>
 
 class MapController : public QObject
 {
@@ -11,20 +13,19 @@ public:
 
 public:
     explicit MapController();
-    void parseAddressOne(QString user_input1);
-    void parseAddressTwo(QString user_input2);
     ~MapController();
 
 private slots:
-    void on_addresses_changed(const QVariant &from_address,
-                              const QVariant &from_coordinate,
-                              const QVariant &to_address,
-                              const QVariant &to_coordinate);
+    void on_addresses_changed(const QVariant &from_location, const QVariant &to_location);
 
 private:
+    QGeoLocation getLocationFromVariant(QVariant variant);
+    void setMapCenter(double latitude, double longitude);
+
     QObject *map;
-    QQmlApplicationEngine *engine;
     QObject *signaller;
+    QObject *rootObject;
+    QQmlApplicationEngine *engine;
 };
 
 #endif // MAPCONTROLLER_H
