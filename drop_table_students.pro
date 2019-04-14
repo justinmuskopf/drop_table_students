@@ -87,5 +87,6 @@ OTHER_FILES +=mapviewer.qml \
     forms/RouteListDelegate.qml \
     forms/RouteListHeader.qml \
     map/ToMarker.qml \
-    map/FromMarker.qml
+    map/FromMarker.qml \
+    map/CenterMarker.qml
 

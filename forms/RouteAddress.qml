@@ -142,8 +142,6 @@ RouteAddressForm {
                         endLocation.address = toAddress
 
                         addressesChanged(startLocation, endLocation)
-                        //addressesChanged(fromAddress, startCoordinate, toAddress, endCoordinate)
-                        showRoute(startCoordinate,endCoordinate)
                     }
                     else
                         goButton.enabled = true

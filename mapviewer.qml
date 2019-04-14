@@ -104,27 +104,15 @@ ApplicationWindow {
         map.forceActiveFocus()
     }
 
-    PlaceSearchModel {
-        id: searchModel
-        searchArea: ""
-        searchTerm: "pizza"
-        Component.onCompleted: update()
+    Plugin {
+        id: myPlugin
+        name:"osm"
     }
 
-
-    ListView {
-        anchors.fill: parent
-        model: searchModel
-        delegate: Component {
-            Row {
-                spacing: 5
-                Marker { height: parent.height }
-                Column {
-                    Text { text: title; font.bold: true }
-                    Text { text: place.location.address.text }
-                }
-            }
-        }
+    PlaceSearchModel {
+        id: searchModel
+        plugin: myPlugin
+        Component.onCompleted: update()
     }
 
 
@@ -138,10 +126,16 @@ ApplicationWindow {
         console.log("Map zoom level: ", map.zoomLevel)
         console.log("Map Center: ", map.center.latitude, map.center.longitude)
 
-        map.mapView.model = searchModel
-        searchModel.searchArea = QtPositioning.circle(centerCoordinate, 100000)
-        searchModel.plugin = map.plugin
+        searchModel.searchTerm = "gas station"
+        searchModel.searchArea = QtPositioning.circle(centerCoordinate, 5000)
+        //searchModel.plugin = map.plugin
 
+        searchModel.update()
+
+        map.setCenterCoordinate(centerCoordinate)
+
+        map.calculateCoordinateRoute(calcFromLocation.coordinate, centerCoordinate)
+        map.calculateCoordinateRoute(calcToLocation.coordinate, centerCoordinate)
 
         map.update()
     }
@@ -186,16 +180,23 @@ ApplicationWindow {
                            properties: { "plugin": map.plugin,
                                "toAddress": toAddress,
                                "fromAddress": fromAddress}})
-        stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
         stackView.currentItem.showMessage.connect(stackView.showMessage)
         stackView.currentItem.closeForm.connect(stackView.closeForm)
         stackView.currentItem.addressesChanged.connect(signaller.setAddresses)
     }
 
     title: qsTr("Mapviewer")
-    height: 800
-    width: 1000
+    height: 500
+    width: 670
     visible: true
+
+    Location {
+        id: calcFromLocation
+    }
+
+    Location {
+        id: calcToLocation
+    }
 
     Item {
         objectName: "signaller"
@@ -206,7 +207,12 @@ ApplicationWindow {
             map.setFromCoordinate(_fromLocation.coordinate)
             map.setToCoordinate(_toLocation.coordinate)
 
+            calcFromLocation.coordinate = _fromLocation.coordinate
+            calcToLocation.coordinate = _toLocation.coordinate
+
             addressesChanged(_fromLocation, _toLocation)
+
+            appWindow.showFullScreen()
         }
     }
 
@@ -214,11 +220,11 @@ ApplicationWindow {
     Address {
         objectName: "fromAddress"
         id : fromAddress
-        street: "13116 Overlook Point Dr"
+        street: "200 Texas St"
         city: "Fort Worth"
         country: "United States"
         state : "Texas"
-        postalCode: "76177"
+        postalCode: "76102"
     }
     //! [geocode0]
 
@@ -403,11 +409,28 @@ ApplicationWindow {
             /*push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
                                properties: {
                                    "routeModel" : map.routeModel
+                               }})*/
+            /*push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
+                               properties: {
+                                   "searchModel" : searchModel,
+                                   "routeModel": map.routeModel
                                }})
+
             currentItem.closeForm.connect(closeForm)*/
             closeForm()
         }
+
+        Connections {
+                target: searchModel
+                onStatusChanged: {
+                    if (searchModel.status == PlaceSearchModel.Error)
+                        console.log(searchModel.errorString());
+                    console.log("Places found: ", searchModel.count)
+                }
+            }
     }
+
+
 
     Component {
         id: mapComponent

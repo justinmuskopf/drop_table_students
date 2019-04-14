@@ -1,3 +1,5 @@
+
+
 /****************************************************************************
 **
 ** Copyright (C) 2017 The Qt Company Ltd.
@@ -47,14 +49,11 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.2
 
 Item {
-    property alias fromStreet: fromStreet
     property alias toStreet: toStreet
     property alias toCity: toCity
     property alias fromCity: fromCity
@@ -63,12 +62,14 @@ Item {
     property alias cancelButton: cancelButton
     property alias toState: toState
     property alias fromState: fromState
+    property alias fromStreet: fromStreet
 
     Rectangle {
         id: tabRectangle
         y: 20
         height: tabTitle.height * 2
         color: "#46a2da"
+        visible: false
         anchors.rightMargin: 0
         anchors.leftMargin: 0
         anchors.left: parent.left
@@ -94,114 +95,205 @@ Item {
         anchors.right: parent.right
         anchors.top: tabRectangle.bottom
 
-        GridLayout {
-            id: gridLayout3
-            rowSpacing: 10
-            rows: 1
-            columns: 2
-            anchors.fill: parent
-
-            Label {
-                id: label1
-                text: qsTr("Address One")
-                font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
-                Layout.columnSpan : 2
-            }
-
-            Label {
-                id: label2
-                text: qsTr("Street")
-            }
-
-            TextField {
-                id: fromStreet
-                Layout.fillWidth: true
-            }
-
-            Label {
-                id: label3
-                text: qsTr("City")
-            }
-
-            TextField {
-                id: fromCity
-                Layout.fillWidth: true
-            }
-
-            Label {
-                id: label7
-                text: qsTr("State")
-            }
-
-            TextField {
-                id: fromState
-                Layout.fillWidth: true
-            }
-
-            Label {
-                id: label6
-                text: qsTr("Address Two")
-                font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
-                Layout.columnSpan: 2
-            }
-
-            Label {
-                id: label4
-                text: qsTr("Street")
-            }
-
-            TextField {
-                id: toStreet
-                Layout.fillWidth: true
-            }
-
-            Label {
-                id: label5
-                text: qsTr("City")
-            }
-
-            TextField {
-                id: toCity
-                Layout.fillWidth: true
-            }
-
-            Label {
-                id: label8
-                text: qsTr("State")
-            }
-
-            TextField {
-                id: toState
-                Layout.fillWidth: true
-            }
-
-            RowLayout {
-                id: rowLayout1
-                Layout.columnSpan: 2
-                Layout.alignment: Qt.AlignRight
-
-                Button {
-                    id: goButton
-                    text: qsTr("Proceed")
-                }
-
-                Button {
-                    id: clearButton
-                    text: qsTr("Clear")
-                }
-
-                Button {
-                    id: cancelButton
-                    text: qsTr("Cancel")
-                }
-            }
-
-            Item {
-                    Layout.fillHeight: true
-                    Layout.columnSpan: 2
-            }
+        Image {
+            id: rect
+            x: -20
+            y: 32
+            width: 636
+            height: 241
+            source: "../resources/rectangleFORM.png"
+            fillMode: Image.PreserveAspectFit
         }
+
+        Label {
+            id: label1
+            x: 258
+            y: 116
+            text: qsTr("Address One")
+            anchors.horizontalCenterOffset: 8
+            font.bold: true
+            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.columnSpan: 2
+        }
+
+
+        Item {
+            x: -12
+            y: 315
+            Layout.fillHeight: true
+            Layout.columnSpan: 2
+        }
+
+        Button {
+            id: cancelButton
+            x: 355
+            y: 211
+            text: qsTr("Cancel")
+        }
+
+        Button {
+            id: clearButton
+            x: 283
+            y: 211
+            text: qsTr("Clear")
+        }
+
+        Button {
+            id: goButton
+            x: 192
+            y: 211
+            text: qsTr("Proceed")
+        }
+
+        RowLayout {
+            id: rowLayout1
+            x: 371
+            y: 279
+            Layout.columnSpan: 2
+            Layout.alignment: Qt.AlignRight
+        }
+
+
+        TextField {
+            id: toState
+            x: 512
+            y: 183
+            width: 80
+            Layout.fillWidth: true
+        }
+
+        Label {
+            id: label8
+            x: 469
+            y: 186
+            text: qsTr("State")
+        }
+
+        TextField {
+            id: toCity
+            x: 373
+            y: 183
+            width: 80
+            Layout.fillWidth: true
+        }
+
+
+        Label {
+            id: label5
+            x: 343
+            y: 186
+            text: qsTr("City")
+        }
+
+        TextField {
+            id: toStreet
+            x: 52
+            y: 183
+            width: 280
+            Layout.fillWidth: true
+        }
+
+        Label {
+            id: label4
+            x: 8
+            y: 186
+            text: qsTr("Street")
+        }
+
+
+        Label {
+            id: label6
+            x: 257
+            y: 166
+            text: qsTr("Address Two")
+            anchors.horizontalCenterOffset: 9
+            font.bold: true
+            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.columnSpan: 2
+        }
+
+        TextField {
+            id: fromState
+            x: 512
+            y: 138
+            width: 80
+            Layout.fillWidth: true
+        }
+
+        Label {
+            id: label7
+            x: 469
+            y: 141
+            text: qsTr("State")
+        }
+
+        TextField {
+            id: fromCity
+            x: 373
+            y: 138
+            width: 80
+            Layout.preferredWidth: 80
+            Layout.fillWidth: false
+        }
+
+
+        Label {
+            id: label3
+            x: 343
+            y: 141
+            height: 16
+            text: qsTr("City")
+            elide: Text.ElideRight
+        }
+
+        TextField {
+            id: fromStreet
+            x: 50
+            y: 138
+            width: 280
+            Layout.preferredWidth: 280
+            Layout.fillWidth: false
+        }
+
+        Label {
+            id: label2
+            x: 8
+            y: 141
+            text: qsTr("Street")
+        }
+
+        Image {
+            id: image1
+            x: 109
+            y: -41
+            width: 399
+            height: 242
+            source: "../resources/meetmehalfway.png"
+            fillMode: Image.PreserveAspectFit
+        }
+
+    }
+
+    Image {
+        id: image
+        anchors.fill: parent
+        z: -3
+        source: "../resources/Screen Shot 2019-04-13 at 7.37.29 PM.png"
+        fillMode: Image.PreserveAspectFit
     }
 }
+
+
+
+
+
+
+
+
+
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}D{i:24;anchors_height:242;anchors_width:399;anchors_x:109;anchors_y:-41}
+D{i:25;anchors_height:508;anchors_width:672;anchors_x:-22;anchors_y:0}
+}
+ ##^##*/

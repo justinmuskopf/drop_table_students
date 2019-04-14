@@ -38,5 +38,10 @@
         <file>map/ToMarker.qml</file>
         <file>resources/from_marker.png</file>
         <file>resources/to_marker.png</file>
+        <file>resources/center_marker.png</file>
+        <file>map/CenterMarker.qml</file>
+        <file>resources/Screen Shot 2019-04-13 at 7.37.29 PM.png</file>
+        <file>resources/meetmehalfway.png</file>
+        <file>resources/rectangleFORM.png</file>
     </qresource>
 </RCC>

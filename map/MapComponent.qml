@@ -141,6 +141,7 @@ Map {
 
     MapItemView {
         id: mapView
+        model: searchModel
         delegate: MapQuickItem {
             coordinate: place.location.coordinate
 
@@ -229,6 +230,24 @@ Map {
         markers = myArray
     }
 
+    function setCenterCoordinate(coordinate)
+    {
+        var count = map.markers.length
+        markerCounter++
+        var marker = Qt.createQmlObject ('CenterMarker {}', map)
+        map.addMapItem(marker)
+        marker.z = map.z+1
+        marker.coordinate = coordinate
+
+        //update list of markers
+        var myArray = new Array()
+        for (var i = 0; i < count; i++){
+            myArray.push(markers[i])
+        }
+        myArray.push(marker)
+        markers = myArray
+    }
+
     function addMarker()
     {
         var count = map.markers.length
@@ -299,7 +318,7 @@ Map {
     {
         //! [routerequest0]
         // clear away any old data in the query
-        routeQuery.clearWaypoints();
+        //routeQuery.clearWaypoints();
 
         // add the start and end coords as waypoints on the route
         routeQuery.addWaypoint(startCoordinate)
@@ -421,6 +440,36 @@ Map {
         }
     }
 
+    Rectangle {
+        width: 200
+        height: appWindow.height
+
+        //layoutDirection: rightEdge() ? Qt.LeftToRight : Qt.RightToLeft
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        //anchors.left: parent.right
+        //opacity: 15
+        //color: "transparent"
+        color: "#eeecec"
+
+        ListView {
+            anchors.fill: parent
+            //property variant searchModel
+            //interactive: true
+            model: searchModel
+
+            delegate: Component {
+                Row {
+                    spacing: 15
+                    Column {
+                        Text { text: title; font.bold: true }
+                        Text { text: place.location.address.text }
+                    }
+                }
+            }
+        }
+    }
 
     MapSliders {
         id: sliders
