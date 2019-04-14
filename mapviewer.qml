@@ -52,6 +52,7 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtLocation 5.6
 import QtPositioning 5.5
+import QtQuick.Window 2.12
 import "map"
 import "menus"
 import "helper.js" as Helper
@@ -61,12 +62,6 @@ ApplicationWindow {
     property variant map
     property variant minimap
     property variant parameters
-
-    //defaults
-    //! [routecoordinate]
-    property variant fromCoordinate: QtPositioning.coordinate(59.9483, 10.7695)
-    property variant toCoordinate: QtPositioning.coordinate(59.9645, 10.671)
-    //! [routecoordinate]
 
     function createMap(provider)
     {
@@ -83,16 +78,10 @@ ApplicationWindow {
         }
 
         var zoomLevel = null
-        //var tilt = null
-        //var bearing = null
-        //var fov = null
         var center = null
         var panelExpanded = null
         if (map) {
             zoomLevel = map.zoomLevel
-            //tilt = map.tilt
-            //bearing = map.bearing
-            //fov = map.fieldOfView
             center = map.center
             panelExpanded = map.slidersExpanded
             map.destroy()
@@ -102,9 +91,6 @@ ApplicationWindow {
         map.plugin = plugin;
 
         if (zoomLevel != null) {
-            //map.tilt = tilt
-            //map.bearing = bearing
-            //map.fieldOfView = fov
             map.zoomLevel = zoomLevel
             map.center = center
             map.slidersExpanded = panelExpanded
@@ -118,13 +104,45 @@ ApplicationWindow {
         map.forceActiveFocus()
     }
 
+    Plugin {
+        id: myPlugin
+        name:"osm"
+    }
+
+    PlaceSearchModel {
+        id: searchModel
+        plugin: myPlugin
+        Component.onCompleted: update()
+    }
+
+
+    function setMapCenter(latitude, longitude)
+    {
+        var centerCoordinate = QtPositioning.coordinate(latitude, longitude)
+
+        map.zoomLevel = 10
+        map.center = centerCoordinate
+
+        console.log("Map zoom level: ", map.zoomLevel)
+        console.log("Map Center: ", map.center.latitude, map.center.longitude)
+
+        searchModel.searchTerm = "gas station"
+        searchModel.searchArea = QtPositioning.circle(centerCoordinate, 5000)
+        //searchModel.plugin = map.plugin
+
+        searchModel.update()
+
+        map.setCenterCoordinate(centerCoordinate)
+
+        map.calculateCoordinateRoute(calcFromLocation.coordinate, centerCoordinate)
+        map.calculateCoordinateRoute(calcToLocation.coordinate, centerCoordinate)
+
+        map.update()
+    }
+
     function providerSelect(provider)
     {
         createMap(provider)
-        if (map.error === Map.NoError) {
-            selectMapType(map.activeMapType)
-            toolsMenu.createMenu(map);
-        }
     }
 
     function getPlugins()
@@ -156,141 +174,66 @@ ApplicationWindow {
         }
     }
 
+    function setAddresses() {
+        stackView.pop({item:page, immediate: true})
+        stackView.push({ item: Qt.resolvedUrl("forms/RouteAddress.qml") ,
+                           properties: { "plugin": map.plugin,
+                               "toAddress": toAddress,
+                               "fromAddress": fromAddress}})
+        stackView.currentItem.showMessage.connect(stackView.showMessage)
+        stackView.currentItem.closeForm.connect(stackView.closeForm)
+        stackView.currentItem.addressesChanged.connect(signaller.setAddresses)
+    }
+
     title: qsTr("Mapviewer")
-    height: 640
-    width: 360
+    height: 500
+    width: 670
     visible: true
-    //menuBar: mainMenu
+
+    Location {
+        id: calcFromLocation
+    }
+
+    Location {
+        id: calcToLocation
+    }
+
+    Item {
+        objectName: "signaller"
+        id: signaller
+        signal addressesChanged(var _fromLocation, var _toLocation)
+
+        function setAddresses(_fromLocation, _toLocation) {
+            map.setFromCoordinate(_fromLocation.coordinate)
+            map.setToCoordinate(_toLocation.coordinate)
+
+            calcFromLocation.coordinate = _fromLocation.coordinate
+            calcToLocation.coordinate = _toLocation.coordinate
+
+            addressesChanged(_fromLocation, _toLocation)
+
+            appWindow.showFullScreen()
+        }
+    }
 
     //! [geocode0]
     Address {
-        id :fromAddress
-        street: "Sandakerveien 116"
-        city: "Oslo"
-        country: "Norway"
-        state : ""
-        postalCode: "0484"
+        objectName: "fromAddress"
+        id : fromAddress
+        street: "200 Texas St"
+        city: "Fort Worth"
+        country: "United States"
+        state : "Texas"
+        postalCode: "76102"
     }
     //! [geocode0]
 
     Address {
         id: toAddress
-        street: "Holmenkollveien 140"
-        city: "Oslo"
-        country: "Norway"
-        postalCode: "0791"
-    }
-/*
-    MainMenu {
-        id: mainMenu
-
-        function toggleMiniMapState()
-        {
-            if (minimap) {
-                minimap.destroy()
-                minimap = null
-            } else {
-                minimap = Qt.createQmlObject ('import "map"; MiniMap{ z: map.z + 2 }', map)
-            }
-        }
-
-        function setLanguage(lang)
-        {
-            map.plugin.locales = lang;
-            stackView.pop(page)
-        }
-
-        onSelectProvider: {
-            stackView.pop()
-            for (var i = 0; i < providerMenu.items.length; i++) {
-                providerMenu.items[i].checked = providerMenu.items[i].text === providerName
-            }
-
-            createMap(providerName)
-            if (map.error === Map.NoError) {
-                selectMapType(map.activeMapType)
-                toolsMenu.createMenu(map);
-            } else {
-                mapTypeMenu.clear();
-                toolsMenu.clear();
-            }
-        }
-
-        onSelectMapType: {
-            stackView.pop(page)
-            for (var i = 0; i < mapTypeMenu.items.length; i++) {
-                mapTypeMenu.items[i].checked = mapTypeMenu.items[i].text === mapType.name
-            }
-            map.activeMapType = mapType
-        }
-
-
-        onSelectTool: {
-            switch (tool) {
-            case "AddressRoute":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/RouteAddress.qml") ,
-                                   properties: { "plugin": map.plugin,
-                                       "toAddress": toAddress,
-                                       "fromAddress": fromAddress}})
-                stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
-                stackView.currentItem.showMessage.connect(stackView.showMessage)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "CoordinateRoute":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/RouteCoordinate.qml") ,
-                                   properties: { "toCoordinate": toCoordinate,
-                                       "fromCoordinate": fromCoordinate}})
-                stackView.currentItem.showRoute.connect(map.calculateCoordinateRoute)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "Geocode":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/Geocode.qml") ,
-                                   properties: { "address": fromAddress}})
-                stackView.currentItem.showPlace.connect(map.geocode)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "RevGeocode":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/ReverseGeocode.qml") ,
-                                   properties: { "coordinate": fromCoordinate}})
-                stackView.currentItem.showPlace.connect(map.geocode)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "Language":
-                stackView.pop({item:page, immediate: true})
-                stackView.push({ item: Qt.resolvedUrl("forms/Locale.qml") ,
-                                   properties: { "locale":  map.plugin.locales[0]}})
-                stackView.currentItem.selectLanguage.connect(setLanguage)
-                stackView.currentItem.closeForm.connect(stackView.closeForm)
-                break
-            case "Clear":
-                map.clearData()
-                break
-            case "Prefetch":
-                map.prefetchData()
-                break
-            default:
-                console.log("Unsupported operation")
-            }
-        }
-
-        onToggleMapState: {
-            stackView.pop(page)
-            switch (state) {
-            case "FollowMe":
-                map.followme = !map.followme
-                break
-            case "MiniMap":
-                toggleMiniMapState()
-                isMiniMap = minimap
-                break
-            default:
-                console.log("Unsupported operation")
-            }
-        }
+        street: "3940 N Elm St"
+        city: "Denton"
+        country: "United States"
+        state: "Texas"
     }
 
     MapPopupMenu {
@@ -329,7 +272,7 @@ ApplicationWindow {
             }
         }
     }
-*/
+
     MarkerPopupMenu {
         id: markerPopupMenu
 
@@ -463,13 +406,31 @@ ApplicationWindow {
 
         function showRouteListPage()
         {
-            push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
+            /*push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
                                properties: {
                                    "routeModel" : map.routeModel
+                               }})*/
+            /*push({ item: Qt.resolvedUrl("forms/RouteList.qml") ,
+                               properties: {
+                                   "searchModel" : searchModel,
+                                   "routeModel": map.routeModel
                                }})
-            currentItem.closeForm.connect(closeForm)
+
+            currentItem.closeForm.connect(closeForm)*/
+            closeForm()
         }
+
+        Connections {
+                target: searchModel
+                onStatusChanged: {
+                    if (searchModel.status == PlaceSearchModel.Error)
+                        console.log(searchModel.errorString());
+                    console.log("Places found: ", searchModel.count)
+                }
+            }
     }
+
+
 
     Component {
         id: mapComponent
@@ -478,7 +439,7 @@ ApplicationWindow {
             width: page.width
             height: page.height
             onFollowmeChanged: mainMenu.isFollowMe = map.followme
-            onSupportedMapTypesChanged: mainMenu.mapTypeMenu.createMenu(map)
+            //onSupportedMapTypesChanged: mainMenu.mapTypeMenu.createMenu(map)
             onCoordinatesCaptured: {
                 var text = "<b>" + qsTr("Latitude:") + "</b> " + Helper.roundNumber(latitude,4) + "<br/><b>" + qsTr("Longitude:") + "</b> " + Helper.roundNumber(longitude,4)
                 stackView.showMessage(qsTr("Coordinates"),text);

@@ -1,11 +1,11 @@
-#include "mainwindow.h"
-#include <QApplication>
+#include "mapcontroller.h"
+#include <QGuiApplication>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    QGuiApplication a(argc, argv);
+
+    MapController map;
 
     return a.exec();
 }

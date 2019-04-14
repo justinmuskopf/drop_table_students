@@ -56,16 +56,26 @@ RouteAddressForm {
     property alias plugin : tempGeocodeModel.plugin;
     property variant fromAddress;
     property variant toAddress;
+
     signal showMessage(string topic, string message)
     signal showRoute(variant startCoordinate,variant endCoordinate)
     signal closeForm()
+    //signal addressesChanged(var _fromAddress, var _fromCoordinate, var _toAddress, var _toCoordinate)
+    signal addressesChanged(var _fromLocation, var _toLocation)
+    Location {
+        id: startLocation
+    }
+
+    Location {
+        id: endLocation
+    }
 
     goButton.onClicked: {
         tempGeocodeModel.reset()
-        fromAddress.country =  fromCountry.text
+        fromAddress.state =  fromState.text
         fromAddress.street = fromStreet.text
         fromAddress.city =  fromCity.text
-        toAddress.country = toCountry.text
+        toAddress.state = toState.text
         toAddress.street = toStreet.text
         toAddress.city = toCity.text
         tempGeocodeModel.startCoordinate = QtPositioning.coordinate()
@@ -91,10 +101,10 @@ RouteAddressForm {
     Component.onCompleted: {
         fromStreet.text  = fromAddress.street
         fromCity.text =  fromAddress.city
-        fromCountry.text = fromAddress.country
+        fromState.text = fromAddress.state
         toStreet.text = toAddress.street
         toCity.text = toAddress.city
-        toCountry.text = toAddress.country
+        toState.text = toAddress.state
     }
 
     GeocodeModel {
@@ -121,9 +131,18 @@ RouteAddressForm {
                 if (success == 2) {
                     endCoordinate.latitude = get(0).coordinate.latitude
                     endCoordinate.longitude = get(0).coordinate.longitude
+
                     success = 0
-                    if (startCoordinate.isValid && endCoordinate.isValid)
-                        showRoute(startCoordinate,endCoordinate)
+                    if (startCoordinate.isValid && endCoordinate.isValid) {
+
+                        startLocation.coordinate = startCoordinate
+                        startLocation.address = fromAddress
+
+                        endLocation.coordinate = endCoordinate
+                        endLocation.address = toAddress
+
+                        addressesChanged(startLocation, endLocation)
+                    }
                     else
                         goButton.enabled = true
                 }
