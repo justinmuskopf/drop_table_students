@@ -13,6 +13,8 @@
 #include <QQmlContext>
 #include <QtMath>
 
+#define MAP_PROVIDER "osm"
+
 MapController::MapController() : QObject()
 {
     engine = new QQmlApplicationEngine("qrc:/mapviewer.qml");
@@ -25,14 +27,14 @@ MapController::MapController() : QObject()
     connect(signaller, SIGNAL(addressesChanged(QVariant, QVariant)), this,
                        SLOT(on_addresses_changed(QVariant, QVariant)));
 
-    QMetaObject::invokeMethod(rootObject, "providerSelect", Q_ARG(QVariant, "osm"));
+    QMetaObject::invokeMethod(rootObject, "providerSelect", Q_ARG(QVariant, MAP_PROVIDER));
 
     QMetaObject::invokeMethod(rootObject, "setAddresses");
 }
 
 MapController::~MapController()
 {
-
+    delete engine;
 }
 
 QGeoLocation MapController::getLocationFromVariant(QVariant variant)
@@ -44,11 +46,59 @@ QGeoLocation MapController::getLocationFromVariant(QVariant variant)
     return location;
 }
 
-void MapController::setMapCenter(double latitude, double longitude)
+void MapController::setMapCenter(QGeoCoordinate center)
 {
-    QGeoCoordinate midCoordinate(latitude, longitude);
 
-    QMetaObject::invokeMethod(rootObject, "setMapCenter", Q_ARG(QVariant, latitude), Q_ARG(QVariant, longitude));
+    QMetaObject::invokeMethod(rootObject, "setMapCenter", Q_ARG(QVariant, center.latitude()), Q_ARG(QVariant, center.longitude()));
+}
+
+double MapController::squareDouble(double toSquare)
+{
+    return qPow(toSquare, 2);
+}
+
+RadMap MapController::getRadiansFromCoordinate(QGeoCoordinate coordinate)
+{
+    RadMap radians;
+
+    radians["latitude"] = qDegreesToRadians(coordinate.latitude());
+    radians["longitude"] = qDegreesToRadians(coordinate.longitude());
+
+    return radians;
+}
+
+double MapController::rootOfSquares(double firstToSquare, double secondToSquare)
+{
+    double sumOfSquares = squareDouble(firstToSquare) + squareDouble(secondToSquare);
+    double root = qSqrt(sumOfSquares);
+
+    return root;
+}
+
+QGeoCoordinate MapController::calculateMapCenter(QGeoCoordinate from, QGeoCoordinate to)
+{
+    RadMap fromRads = getRadiansFromCoordinate(from);
+    RadMap toRads = getRadiansFromCoordinate(to);
+
+    double deltaLong = toRads["longitude"] - fromRads["longitude"];
+
+    double changeInLat = qCos(toRads["latitude"]) * qCos(deltaLong);
+    double changeInLong = qCos(toRads["latitude"]) * qSin(deltaLong);
+
+    double sinLatSum = qSin(fromRads["latitude"]) + qSin(toRads["latitude"]);
+    double cosLatPlusX = qCos(fromRads["latitude"]) + changeInLat;
+
+    double rooted = rootOfSquares(cosLatPlusX, changeInLong);
+
+    double midLat = qAtan2(sinLatSum, rooted);
+    double midLong = fromRads["longitude"] + qAtan2(changeInLong, cosLatPlusX);
+
+    double midLatDegrees = qRadiansToDegrees(midLat);
+    double midLongDegrees = qRadiansToDegrees(midLong);
+
+    QGeoCoordinate center(midLatDegrees, midLongDegrees);
+
+    return center;
 }
 
 void MapController::on_addresses_changed(const QVariant &from_location, const QVariant &to_location)
@@ -57,33 +107,10 @@ void MapController::on_addresses_changed(const QVariant &from_location, const QV
     QGeoLocation toLocation = getLocationFromVariant(to_location);
 
     QGeoCoordinate fromCoordinate = fromLocation.coordinate();
-    QGeoCoordinate toCooridnate = toLocation.coordinate();
+    QGeoCoordinate toCoordinate = toLocation.coordinate();
 
-    double fromLat = qDegreesToRadians(fromCoordinate.latitude());
-    double fromLong = qDegreesToRadians(fromCoordinate.longitude());
+    QGeoCoordinate center = calculateMapCenter(fromCoordinate, toCoordinate);
 
-    double toLat = qDegreesToRadians(toCooridnate.latitude());
-    double toLong = qDegreesToRadians(toCooridnate.longitude());
-
-    double deltaLong = toLong - fromLong;
-
-    double x = qCos(toLat) * qCos(deltaLong);
-    double y = qCos(toLat) * qSin(deltaLong);
-
-    double sinLatSum = qSin(fromLat) + qSin(toLat);
-
-    double cosLatPlusX = qCos(fromLat) + x;
-
-    double rooted = qSqrt(qPow(cosLatPlusX, 2) + qPow(y, 2));
-
-    double midLat = qAtan2(sinLatSum, rooted);
-    double midLong = fromLong + qAtan2(y, cosLatPlusX);
-
-    double midLatDegrees = qRadiansToDegrees(midLat);
-    double midLongDegrees = qRadiansToDegrees(midLong);
-
-    setMapCenter(midLatDegrees, midLongDegrees);
-
-    qDebug() << midLatDegrees << midLongDegrees;
+    setMapCenter(center);
 }
 

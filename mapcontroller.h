@@ -5,6 +5,9 @@
 #include <QQmlApplicationEngine>
 #include <QGeoLocation>
 #include <QVariant>
+#include <QGeoCoordinate>
+
+typedef QMap<QString, double> RadMap;
 
 class MapController : public QObject
 {
@@ -17,10 +20,14 @@ public:
 
 private slots:
     void on_addresses_changed(const QVariant &from_location, const QVariant &to_location);
+    QGeoCoordinate calculateMapCenter(QGeoCoordinate from, QGeoCoordinate to);
 
 private:
     QGeoLocation getLocationFromVariant(QVariant variant);
-    void setMapCenter(double latitude, double longitude);
+    void setMapCenter(QGeoCoordinate center);
+    double squareDouble(double toSquare);
+    RadMap getRadiansFromCoordinate(QGeoCoordinate);
+    double rootOfSquares(double firstToSquare, double csecondToSquare);
 
     QObject *map;
     QObject *signaller;
