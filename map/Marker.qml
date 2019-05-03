@@ -79,7 +79,11 @@ MapQuickItem {
             drag.target: marker
             preventStealing: true
 
-            onPressed : {
+            onClicked: {
+
+            //onPressed : {
+                map.showMarkerMenu(marker.coordinate)
+
                 map.pressX = mouse.x
                 map.pressY = mouse.y
                 map.currentMarker = -1

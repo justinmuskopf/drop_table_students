@@ -63,6 +63,8 @@ Item {
     property alias toState: toState
     property alias fromState: fromState
     property alias fromStreet: fromStreet
+    property alias query: query
+    property alias slider: slider
 
     Rectangle {
         id: tabRectangle
@@ -97,10 +99,10 @@ Item {
 
         Image {
             id: rect
-            x: -20
-            y: 32
+            x: -18
+            y: -20
             width: 636
-            height: 241
+            height: 336
             source: "../resources/rectangleFORM.png"
             fillMode: Image.PreserveAspectFit
         }
@@ -108,14 +110,13 @@ Item {
         Label {
             id: label1
             x: 258
-            y: 116
+            y: 93
             text: qsTr("Address One")
             anchors.horizontalCenterOffset: 8
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
             Layout.columnSpan: 2
         }
-
 
         Item {
             x: -12
@@ -127,21 +128,21 @@ Item {
         Button {
             id: cancelButton
             x: 355
-            y: 211
+            y: 222
             text: qsTr("Cancel")
         }
 
         Button {
             id: clearButton
             x: 283
-            y: 211
+            y: 222
             text: qsTr("Clear")
         }
 
         Button {
             id: goButton
             x: 192
-            y: 211
+            y: 222
             text: qsTr("Proceed")
         }
 
@@ -153,11 +154,10 @@ Item {
             Layout.alignment: Qt.AlignRight
         }
 
-
         TextField {
             id: toState
             x: 512
-            y: 183
+            y: 156
             width: 80
             Layout.fillWidth: true
         }
@@ -165,30 +165,29 @@ Item {
         Label {
             id: label8
             x: 469
-            y: 186
+            y: 160
             text: qsTr("State")
         }
 
         TextField {
             id: toCity
             x: 373
-            y: 183
+            y: 156
             width: 80
             Layout.fillWidth: true
         }
 
-
         Label {
             id: label5
             x: 343
-            y: 186
+            y: 159
             text: qsTr("City")
         }
 
         TextField {
             id: toStreet
             x: 52
-            y: 183
+            y: 156
             width: 280
             Layout.fillWidth: true
         }
@@ -196,15 +195,14 @@ Item {
         Label {
             id: label4
             x: 8
-            y: 186
+            y: 159
             text: qsTr("Street")
         }
-
 
         Label {
             id: label6
             x: 257
-            y: 166
+            y: 139
             text: qsTr("Address Two")
             anchors.horizontalCenterOffset: 9
             font.bold: true
@@ -215,7 +213,7 @@ Item {
         TextField {
             id: fromState
             x: 512
-            y: 138
+            y: 111
             width: 80
             Layout.fillWidth: true
         }
@@ -223,24 +221,23 @@ Item {
         Label {
             id: label7
             x: 469
-            y: 141
+            y: 116
             text: qsTr("State")
         }
 
         TextField {
             id: fromCity
             x: 373
-            y: 138
+            y: 113
             width: 80
             Layout.preferredWidth: 80
             Layout.fillWidth: false
         }
 
-
         Label {
             id: label3
             x: 343
-            y: 141
+            y: 116
             height: 16
             text: qsTr("City")
             elide: Text.ElideRight
@@ -249,7 +246,7 @@ Item {
         TextField {
             id: fromStreet
             x: 50
-            y: 138
+            y: 113
             width: 280
             Layout.preferredWidth: 280
             Layout.fillWidth: false
@@ -258,20 +255,69 @@ Item {
         Label {
             id: label2
             x: 8
-            y: 141
+            y: 116
             text: qsTr("Street")
         }
 
         Image {
             id: image1
             x: 109
-            y: -41
+            y: -45
             width: 399
             height: 242
             source: "../resources/meetmehalfway.png"
             fillMode: Image.PreserveAspectFit
+
+            Slider {
+                id: slider
+                x: 291
+                y: 235
+                width: 156
+                height: 22
+                tickmarksEnabled: false
+                stepSize: 50
+                minimumValue: 100
+                value: 100
+                maximumValue: 10000
+
+                Text {
+                    id: sliderText
+                    width: 32
+                    text: parent.value
+                    anchors.leftMargin: 0
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 2
+                    anchors.top: parent.top
+                    anchors.topMargin: 5
+                    font.family: "Arial"
+                    anchors.left: parent.right
+                    font.pixelSize: parent.height * .5
+                }
+
+            }
         }
 
+        TextField {
+            id: query
+            x: 52
+            y: 189
+            width: 280
+            Layout.fillWidth: true
+        }
+
+        Label {
+            id: label9
+            x: 8
+            y: 192
+            text: qsTr("Search")
+        }
+
+        Label {
+            id: label10
+            x: 343
+            y: 196
+            text: qsTr("Radius (m)")
+        }
     }
 
     Image {
@@ -290,10 +336,9 @@ Item {
 
 
 
-
-
 /*##^## Designer {
-    D{i:0;autoSize:true;height:480;width:640}D{i:24;anchors_height:242;anchors_width:399;anchors_x:109;anchors_y:-41}
-D{i:25;anchors_height:508;anchors_width:672;anchors_x:-22;anchors_y:0}
+    D{i:0;autoSize:true;height:480;width:640}D{i:23;anchors_height:242;anchors_width:399;anchors_x:109;anchors_y:"-41"}
+D{i:26;anchors_height:22}D{i:24;anchors_height:242;anchors_width:399;anchors_x:109;anchors_y:"-41"}
+D{i:29;anchors_height:508;anchors_width:672;anchors_x:"-22";anchors_y:0}D{i:30;anchors_height:508;anchors_width:672;anchors_x:"-22";anchors_y:0}
 }
  ##^##*/

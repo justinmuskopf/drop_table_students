@@ -57,6 +57,11 @@ Menu {
     property int mapItemsCount
     signal itemClicked(string item)
 
+    function test() {
+        clear()
+        addItem("poopidy scoop")
+    }
+
     function update() {
         clear()
         addItem(qsTr("Add Marker")).triggered.connect(function(){itemClicked("addMarker")})

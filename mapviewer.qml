@@ -62,6 +62,7 @@ ApplicationWindow {
     property variant map
     property variant minimap
     property variant parameters
+    property variant searchQuery
 
     function createMap(provider)
     {
@@ -115,7 +116,6 @@ ApplicationWindow {
         Component.onCompleted: update()
     }
 
-
     function setMapCenter(latitude, longitude)
     {
         var centerCoordinate = QtPositioning.coordinate(latitude, longitude)
@@ -126,13 +126,13 @@ ApplicationWindow {
         console.log("Map zoom level: ", map.zoomLevel)
         console.log("Map Center: ", map.center.latitude, map.center.longitude)
 
-        searchModel.searchTerm = "gas station"
-        searchModel.searchArea = QtPositioning.circle(centerCoordinate, 5000)
+        searchModel.searchTerm = searchQuery.query
+        searchModel.searchArea = QtPositioning.circle(centerCoordinate, searchQuery.radius)
         //searchModel.plugin = map.plugin
 
         searchModel.update()
 
-        map.setCenterCoordinate(centerCoordinate)
+        map.setCenterCoordinate(centerCoordinate, searchQuery.radius)
 
         map.calculateCoordinateRoute(calcFromLocation.coordinate, centerCoordinate)
         map.calculateCoordinateRoute(calcToLocation.coordinate, centerCoordinate)
@@ -199,21 +199,38 @@ ApplicationWindow {
     }
 
     Item {
+        id: searchQuery
+        property string query: "";
+        property real radius: 0;
+    }
+
+    Item {
         objectName: "signaller"
         id: signaller
         signal addressesChanged(var _fromLocation, var _toLocation)
 
-        function setAddresses(_fromLocation, _toLocation) {
+        function setAddresses(_fromLocation, _toLocation, _searchFor, _radius) {
             map.setFromCoordinate(_fromLocation.coordinate)
             map.setToCoordinate(_toLocation.coordinate)
 
             calcFromLocation.coordinate = _fromLocation.coordinate
             calcToLocation.coordinate = _toLocation.coordinate
 
+            searchQuery.query = _searchFor
+            searchQuery.radius = _radius
+
             addressesChanged(_fromLocation, _toLocation)
 
             appWindow.showFullScreen()
         }
+    }
+
+    Rectangle {
+        width:2000
+        anchors.left: parent.right
+        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+
     }
 
     //! [geocode0]

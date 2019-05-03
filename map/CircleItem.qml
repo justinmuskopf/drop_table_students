@@ -60,9 +60,24 @@ MapCircle {
     smooth: true
     opacity: 0.25
 
+    /*
     function setGeometry(markers, index){
         center.latitude = markers[index].coordinate.latitude
         center.longitude = markers[index].coordinate.longitude
         radius= center.distanceTo(markers[index + 1].coordinate)
+    }*/
+
+    function show(_center, _radius)
+    {
+        center.latitude = _center.latitude
+        center.longitude = _center.longitude
+        radius = _radius
+
+        visible = true
+    }
+
+    function hide()
+    {
+        visible = false
     }
 }
