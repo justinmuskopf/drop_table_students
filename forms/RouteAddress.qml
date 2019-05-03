@@ -56,12 +56,14 @@ RouteAddressForm {
     property alias plugin : tempGeocodeModel.plugin;
     property variant fromAddress;
     property variant toAddress;
+    property variant searchQuery;
+    property variant radius;
 
     signal showMessage(string topic, string message)
     signal showRoute(variant startCoordinate,variant endCoordinate)
     signal closeForm()
     //signal addressesChanged(var _fromAddress, var _fromCoordinate, var _toAddress, var _toCoordinate)
-    signal addressesChanged(var _fromLocation, var _toLocation)
+    signal addressesChanged(var _fromLocation, var _toLocation, var _toSearch, var _radius)
     Location {
         id: startLocation
     }
@@ -83,6 +85,9 @@ RouteAddressForm {
         tempGeocodeModel.query = fromAddress
         tempGeocodeModel.update();
         goButton.enabled = false;
+
+        searchQuery = query.text
+        radius = slider.value
     }
 
     clearButton.onClicked: {
@@ -141,7 +146,7 @@ RouteAddressForm {
                         endLocation.coordinate = endCoordinate
                         endLocation.address = toAddress
 
-                        addressesChanged(startLocation, endLocation)
+                        addressesChanged(startLocation, endLocation, searchQuery, radius)
                     }
                     else
                         goButton.enabled = true

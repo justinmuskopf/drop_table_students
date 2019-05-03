@@ -230,7 +230,12 @@ Map {
         markers = myArray
     }
 
-    function setCenterCoordinate(coordinate)
+    CircleItem {
+        id: searchCircle
+        visible: false
+    }
+
+    function setCenterCoordinate(coordinate, radius)
     {
         var count = map.markers.length
         markerCounter++
@@ -238,6 +243,8 @@ Map {
         map.addMapItem(marker)
         marker.z = map.z+1
         marker.coordinate = coordinate
+
+        searchCircle.show(coordinate, radius)
 
         //update list of markers
         var myArray = new Array()
@@ -441,8 +448,11 @@ Map {
     }
 
     Rectangle {
+        id: placeList
         width: 200
         height: appWindow.height
+
+        focus: true
 
         //layoutDirection: rightEdge() ? Qt.LeftToRight : Qt.RightToLeft
         anchors.top: parent.top
@@ -454,20 +464,34 @@ Map {
         color: "#eeecec"
 
         ListView {
+            id: list
             anchors.fill: parent
-            //property variant searchModel
-            //interactive: true
+            interactive: true
             model: searchModel
+            focus: true
 
             delegate: Component {
-                Row {
-                    spacing: 15
+                Item {
+                    width: parent.width
+                    height: 50
                     Column {
                         Text { text: title; font.bold: true }
                         Text { text: place.location.address.text }
                     }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: list.currentIndex = index
+                    }
                 }
             }
+            highlight: Rectangle {
+                color: "black"
+                radius: 5
+                opacity: 0.7
+                focus: true
+            }
+            onCurrentItemChanged: console.log(searchModel.get(list.currentIndex).name + ' selected')
+
         }
     }
 
@@ -575,12 +599,13 @@ Map {
                     }
                 }
 
+                /*
                 onPressAndHold:{
                     if (Math.abs(map.pressX - parent.x- mouse.x ) < map.jitterThreshold
                             && Math.abs(map.pressY - parent.y - mouse.y ) < map.jitterThreshold) {
                         showRouteMenu(lastCoordinate);
                     }
-                }
+                }*/
 
             }
     //! [routedelegate1]
@@ -646,12 +671,14 @@ Map {
                     }
                 }
 
+                /*
                 onPressAndHold:{
                     if (Math.abs(map.pressX - parent.x- mouse.x ) < map.jitterThreshold
                             && Math.abs(map.pressY - parent.y - mouse.y ) < map.jitterThreshold) {
                         showPointMenu(lastCoordinate);
                     }
                 }
+                */
             }
     //! [pointdel1]
         }
@@ -725,12 +752,13 @@ Map {
             lastY = -1;
         }
 
+        /*
         onPressAndHold:{
             if (Math.abs(map.pressX - mouse.x ) < map.jitterThreshold
                     && Math.abs(map.pressY - mouse.y ) < map.jitterThreshold) {
                 showMainMenu(lastCoordinate);
             }
-        }
+        }*/
     }
 //! [end]
 }
