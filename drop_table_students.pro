@@ -35,7 +35,8 @@ HEADERS += \
     location.h \
     address.h \
     generatedlocation.h \
-    mapcontroller.h
+    mapcontroller.h \
+    fileio.h
 
 FORMS +=
 

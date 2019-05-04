@@ -6,6 +6,7 @@
 #include <QGeoLocation>
 #include <QVariant>
 #include <QGeoCoordinate>
+#include "fileio.h"
 
 typedef QMap<QString, double> RadMap;
 
@@ -33,6 +34,8 @@ private:
     QObject *signaller;
     QObject *rootObject;
     QQmlApplicationEngine *engine;
+
+    FileIO fileio;
 };
 
 #endif // MAPCONTROLLER_H

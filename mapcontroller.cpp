@@ -12,6 +12,8 @@
 #include <QGeoCoordinate>
 #include <QQmlContext>
 #include <QtMath>
+#include <QNetworkConfigurationManager>
+#include "fileio.h"
 
 #define MAP_PROVIDER "osm"
 
@@ -19,6 +21,8 @@ MapController::MapController() : QObject()
 {
     engine = new QQmlApplicationEngine("qrc:/mapviewer.qml");
     engine->addImportPath(QStringLiteral(":/imports"));
+
+    engine->rootContext()->setContextProperty("fileio", &fileio);
 
     rootObject = engine->rootObjects().first();
     map = rootObject->findChild<QObject *>("map");
@@ -29,7 +33,15 @@ MapController::MapController() : QObject()
 
     QMetaObject::invokeMethod(rootObject, "providerSelect", Q_ARG(QVariant, MAP_PROVIDER));
 
-    QMetaObject::invokeMethod(rootObject, "setAddresses");
+    QNetworkConfigurationManager mgr;
+    if (!mgr.isOnline())
+    {
+        QMetaObject::invokeMethod(rootObject, "isOffline");
+    }
+    else
+    {
+        QMetaObject::invokeMethod(rootObject, "setAddresses");
+    }
 }
 
 MapController::~MapController()
@@ -113,4 +125,3 @@ void MapController::on_addresses_changed(const QVariant &from_location, const QV
 
     setMapCenter(center);
 }
-

@@ -51,6 +51,7 @@
 import QtQuick 2.5
 import QtLocation 5.6
 import QtPositioning 5.5
+import QtQuick.Dialogs 1.3
 
 RouteAddressForm {
     property alias plugin : tempGeocodeModel.plugin;
@@ -72,7 +73,28 @@ RouteAddressForm {
         id: endLocation
     }
 
+    MessageDialog {
+        id: noQueryDialog
+        visible: false
+        title: "Empty Search Query"
+        text: "Please enter a search query before proceeding!";
+        onAccepted: {
+            visible = false
+        }
+
+        function show() {
+            visible = true
+        }
+    }
+
+    cancelButton.enabled: false
+
     goButton.onClicked: {
+        if (query.text == "") {
+            noQueryDialog.show()
+            return
+        }
+
         tempGeocodeModel.reset()
         fromAddress.state =  fromState.text
         fromAddress.street = fromStreet.text
@@ -85,6 +107,7 @@ RouteAddressForm {
         tempGeocodeModel.query = fromAddress
         tempGeocodeModel.update();
         goButton.enabled = false;
+        cancelButton.enabled = true;
 
         searchQuery = query.text
         radius = slider.value
@@ -93,10 +116,11 @@ RouteAddressForm {
     clearButton.onClicked: {
         fromStreet.text = ""
         fromCity.text = ""
-        fromCountry.text = ""
+        fromState.text = ""
         toStreet.text = ""
         toCity.text = ""
-        toCountry.text = ""
+        toState.text = ""
+        searchQuery.text = ""
     }
 
     cancelButton.onClicked: {
@@ -155,7 +179,7 @@ RouteAddressForm {
                 var st = (success == 0 ) ? "start" : "end"
                 success = 0
                 if ((status == GeocodeModel.Ready) && (count == 0 )) {
-                    showMessage(qsTr("Geocode Error"),qsTr("Unsuccessful geocode"));
+                    stackView.showMessage(qsTr("Address Geocoding Error"), qsTr("Unsuccessful geocode... Are your addresses correct?"))
                     goButton.enabled = true;
                 }
                 else if (status == GeocodeModel.Error) {

@@ -82,6 +82,7 @@ Map {
     signal showRouteMenu(variant coordinate)
     signal showPointMenu(variant coordinate)
     signal showRouteList()
+    signal shareLocations()
 
     function geocodeMessage()
     {
@@ -137,6 +138,102 @@ Map {
         text = Helper.formatDistance(dist)
         scaleImage.width = (scaleImage.sourceSize.width * f) - 2 * scaleImageLeft.sourceSize.width
         scaleText.text = text
+    }
+
+    Button {
+        z:1
+        id: shareButton
+        text: "Share"
+        width: parent.width / 10
+        height: parent.height / 20
+        anchors.right: placeList.left
+        anchors.bottom: parent.bottom
+
+        onClicked: appWindow.shareLocations()
+    }
+
+    Button {
+        z:1
+        signal newSearch()
+        id: newSearchButton
+        text: "New Search"
+        width: parent.width / 10
+        height: parent.height / 20
+        anchors.right: shareButton.left
+        anchors.bottom: parent.bottom
+
+        onClicked: appWindow.setAddresses()
+    }
+
+    Rectangle {
+        id: placeList
+        width: parent.width / 4
+        height: appWindow.height
+        z:1
+        focus: true
+
+        border.width: 1
+        border.color: "black"
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: mouse.accepted = false
+            propagateComposedEvents: true
+        }
+
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        //anchors.left: map.right
+        //opacity: 15
+        //color: "transparent"
+        color: "#eeecec"
+
+        ListView {
+            id: list
+            anchors.fill: parent
+            anchors.left: parent.right + 5
+            interactive: true
+            model: searchModel
+            focus: true
+            z:2
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: mouse.accept = false
+                propagateComposedEvents: true
+            }
+
+            delegate: Component {
+                Item {
+                    z:3
+                    width: parent.width
+                    height: 50
+                    Column {
+                        Text { text: title; font.bold: true }
+                        Text { text: place.location.address.text }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            list.currentIndex = index;
+                            mouse.accepted = true
+                        }
+                        onDoubleClicked: mouse.accepted = true
+                        propagateComposedEvents: false
+                    }
+                }
+            }
+
+            highlight: Rectangle {
+                color: "black"
+                radius: 5
+                opacity: 0.7
+                focus: true
+            }
+            onCurrentItemChanged: console.log(searchModel.get(list.currentIndex).name + ' selected')
+
+        }
     }
 
     MapItemView {
@@ -447,53 +544,7 @@ Map {
         }
     }
 
-    Rectangle {
-        id: placeList
-        width: 200
-        height: appWindow.height
 
-        focus: true
-
-        //layoutDirection: rightEdge() ? Qt.LeftToRight : Qt.RightToLeft
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        //anchors.left: parent.right
-        //opacity: 15
-        //color: "transparent"
-        color: "#eeecec"
-
-        ListView {
-            id: list
-            anchors.fill: parent
-            interactive: true
-            model: searchModel
-            focus: true
-
-            delegate: Component {
-                Item {
-                    width: parent.width
-                    height: 50
-                    Column {
-                        Text { text: title; font.bold: true }
-                        Text { text: place.location.address.text }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: list.currentIndex = index
-                    }
-                }
-            }
-            highlight: Rectangle {
-                color: "black"
-                radius: 5
-                opacity: 0.7
-                focus: true
-            }
-            onCurrentItemChanged: console.log(searchModel.get(list.currentIndex).name + ' selected')
-
-        }
-    }
 
     MapSliders {
         id: sliders

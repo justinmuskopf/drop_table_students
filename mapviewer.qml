@@ -53,6 +53,7 @@ import QtQuick.Controls 1.4
 import QtLocation 5.6
 import QtPositioning 5.5
 import QtQuick.Window 2.12
+import QtQuick.Dialogs 1.3
 import "map"
 import "menus"
 import "helper.js" as Helper
@@ -62,7 +63,12 @@ ApplicationWindow {
     property variant map
     property variant minimap
     property variant parameters
-    property variant searchQuery
+    //property variant searchQuery
+
+    function isOffline() {
+        stackView.showFatalMessage("OFFLINE", "ERROR: You must have a valid internet connection to use this application!");//, stackView.currentItem);
+        //Qt.quit()
+    }
 
     function createMap(provider)
     {
@@ -111,9 +117,14 @@ ApplicationWindow {
     }
 
     PlaceSearchModel {
+        signal searchCompleted(var _count)
+
         id: searchModel
         plugin: myPlugin
-        Component.onCompleted: update()
+        Component.onCompleted: {
+            searchCompleted(count)
+            update()
+        }
     }
 
     function setMapCenter(latitude, longitude)
@@ -174,6 +185,25 @@ ApplicationWindow {
         }
     }
 
+    function shareLocations() {
+        var toWrite = new String;
+
+        for (var i = 0; i < searchModel.count; i++) {
+            //var name = searchModel.data(i, "name")
+
+            var name = searchModel.data(i, "name");
+            var place = searchModel.data(i, "place");
+            var address = place.location.address;
+
+            toWrite += name + "\n" + address.street + "\n" + address.city + ", " + address.state + " " + address.postalCode + "\n\n";
+
+            //var address = searchModel.data(i, "location").address
+            console.log(toWrite)
+        }
+
+        fileio.write("MMHA_Locations.txt", toWrite);
+    }
+
     function setAddresses() {
         stackView.pop({item:page, immediate: true})
         stackView.push({ item: Qt.resolvedUrl("forms/RouteAddress.qml") ,
@@ -202,7 +232,10 @@ ApplicationWindow {
         id: searchQuery
         property string query: "";
         property real radius: 0;
+        property bool searched: false;
     }
+
+
 
     Item {
         objectName: "signaller"
@@ -221,16 +254,8 @@ ApplicationWindow {
 
             addressesChanged(_fromLocation, _toLocation)
 
-            appWindow.showFullScreen()
+            //appWindow.showFullScreen()
         }
-    }
-
-    Rectangle {
-        width:2000
-        anchors.left: parent.right
-        anchors.bottom: parent.bottom
-        anchors.top: parent.top
-
     }
 
     //! [geocode0]
@@ -411,6 +436,16 @@ ApplicationWindow {
             currentItem.closeForm.connect(closeMessage)
         }
 
+        function showFatalMessage(title, message) {
+            push({ item: Qt.resolvedUrl("forms/Message.qml") ,
+                               properties: {
+                                   "title" : title,
+                                   "message" : message,
+                                   "backPage" : stackView.currentItem
+                               }})
+            currentItem.closeForm.connect(Qt.quit)
+        }
+
         function closeMessage(backPage)
         {
             pop(backPage)
@@ -437,16 +472,38 @@ ApplicationWindow {
             closeForm()
         }
 
+        MessageDialog {
+            id: noPlacesDialog
+            visible: false
+            title: "Empty Search Results"
+            text: "No locations were found with the query \"" + searchQuery.query + "\" within a radius of " + searchQuery.radius + " meters!"
+            onAccepted: {
+                setAddresses()
+                visible = false
+            }
+
+            function show() {
+                visible = true
+            }
+        }
+
         Connections {
                 target: searchModel
                 onStatusChanged: {
-                    if (searchModel.status == PlaceSearchModel.Error)
+                    if (searchModel.status == PlaceSearchModel.Error) {
+                        return
+                    }
+
+                    if (searchModel.status == PlaceSearchModel.Ready) {
                         console.log(searchModel.errorString());
-                    console.log("Places found: ", searchModel.count)
+                        console.log("Places found: ", searchModel.count)
+                        if (searchModel.count == 0) {
+                            noPlacesDialog.show()
+                        }
+                    }
                 }
             }
     }
-
 
 
     Component {
@@ -464,7 +521,7 @@ ApplicationWindow {
             onGeocodeFinished:{
                 if (map.geocodeModel.status == GeocodeModel.Ready) {
                     if (map.geocodeModel.count == 0) {
-                        stackView.showMessage(qsTr("Geocode Error"),qsTr("Unsuccessful geocode"))
+                        stackView.showMessage(qsTr("Address Geocoding Error"), qsTr("Unsuccessful geocode... Are your addresses correct?"))
                     } else if (map.geocodeModel.count > 1) {
                         stackView.showMessage(qsTr("Ambiguous geocode"), map.geocodeModel.count + " " +
                                               qsTr("results found for the given address, please specify location"))
@@ -472,10 +529,11 @@ ApplicationWindow {
                         stackView.showMessage(qsTr("Location"), geocodeMessage(),page)
                     }
                 } else if (map.geocodeModel.status == GeocodeModel.Error) {
-                    stackView.showMessage(qsTr("Geocode Error"),qsTr("Unsuccessful geocode"))
+                    stackView.showMessage(qsTr("Address Geocoding Error"), qsTr("Unsuccessful geocode... Are your addresses correct?"))
+                    //stackView.showMessage(qsTr("Geocode Error"),qsTr("Unsuccessful geocode"))
                 }
             }
-            onRouteError: stackView.showMessage(qsTr("Route Error"),qsTr("Unable to find a route for the given points"),page)
+            //onRouteError: stackView.showMessage(qsTr("Route Error"),qsTr("Unable to find a route for the given points"),page)
 
             onShowGeocodeInfo: stackView.showMessage(qsTr("Location"),geocodeMessage(),page)
 
@@ -494,6 +552,6 @@ ApplicationWindow {
             onShowRouteMenu: itemPopupMenu.show("Route",coordinate)
             onShowPointMenu: itemPopupMenu.show("Point",coordinate)
             onShowRouteList: stackView.showRouteListPage()
-        }
+        }        
     }
 }
