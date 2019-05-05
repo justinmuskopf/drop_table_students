@@ -262,20 +262,11 @@ ApplicationWindow {
     Address {
         objectName: "fromAddress"
         id : fromAddress
-        street: "200 Texas St"
-        city: "Fort Worth"
-        country: "United States"
-        state : "Texas"
-        postalCode: "76102"
     }
     //! [geocode0]
 
     Address {
         id: toAddress
-        street: "3940 N Elm St"
-        city: "Denton"
-        country: "United States"
-        state: "Texas"
     }
 
     MapPopupMenu {
